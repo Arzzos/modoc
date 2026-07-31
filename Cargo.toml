@@ -1,0 +1,39 @@
+[package]
+name = "modoc"
+version = "0.1.0"
+edition = "2021"
+authors = ["Arzzos <razzofwar@gmail.com>"]
+description = "Herramienta CLI profesional para interactuar, monitorear y simular comunicaciones Modbus TCP/RTU"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Arzzos/modoc"
+readme = "README.md"
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Runtime asíncrono
+tokio = { version = "1.40", features = ["full"] }
+
+# Modbus y Comunicación Serial
+tokio-modbus = { version = "0.12", features = ["tcp", "rtu", "serial"] }
+serialport = "4.4" # Útil para listar puertos serie disponibles en el sistema
+
+# TUI (Interfaz de Terminal)
+ratatui = "0.26"
+crossterm = { version = "0.27", features = ["event-stream"] }
+
+# Serialización (Configuración del sistema)
+serde = { version = "1.0", features = ["derive"] }
+serde_yml = "0.0.12" # Reemplazo moderno y activo para serde_yaml
+
+# Manejo de errores robusto
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging e Inspección en tiempo de ejecución
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilidades para flujos asíncronos
+futures = "0.3"

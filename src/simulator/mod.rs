@@ -1,5 +1,6 @@
-pub mod slave;
+//! Simulador de esclavo Modbus.
+//!
+//! Permite emular un dispositivo Modbus para pruebas sin hardware real.
 
-// DEV's:
-// El entorno de pruebas virtuales. Permite simular registros Modbus en memoria (Holding/Input)
-// para que un usuario pueda probar herramientas de software sin hardware real.
+mod slave;
+pub use slave::run_slave;

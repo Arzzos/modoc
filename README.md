@@ -1,139 +1,192 @@
-# Modoc - Industrial Modbus CLI & TUI Tool  
-  
-[!\[Crates.io\](https://img.shields.io/crates/v/modoc)\](https://crates.io/crates/modoc)  
-[!\[License\](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)\](LICENSE)  
-[!\[Build Status\](https://github.com/Arzzos/modoc/workflows/CI/badge.svg)\](https://github.com/Arzzos/modoc/actions)  
-  
----  
-  
-## English Description  
-  
-Modoc is a modern, ultra-fast, cross-platform CLI and TUI companion for Modbus TCP/RTU protocol inspection, real-time data streaming monitoring, and hardware simulation built in Rust.  
-  
-### Features  
-- \*\*Intuitive Commands\*\*: Built-in support for \`read\`, \`monitor\`, and \`serve\` context operations.  
-- \*\*Terminal User Interface (TUI)\*\*: Live analytical dashboard utilizing interactive sparklines and widgets powered by \`ratatui\`.  
-- \*\*Dual Support\*\*: Hardware Abstraction Layer for both TCP (Ethernet) and RTU (RS485/Serial port) environments.  
-- \*\*Industrial Resilience\*\*: Asynchronous, non-blocking network core driven by \`tokio\` featuring robust CRC, timeout, and exception error handling.  
-- \*\*Built-in Simulator\*\*: Virtual Modbus server orchestration to mock hardware behaviors for local environment testing.  
-  
----  
-  
-## Descripción en Español  
-  
-Modoc es una herramienta de línea de comandos moderna y eficiente para interactuar con dispositivos Modbus TCP/RTU. Permite leer y escribir registros, monitorizar variables en tiempo real con una interfaz TUI gráfica, y simular un entorno esclavo Modbus para pruebas locales sin hardware real.  
-  
-### Características  
-- \*\*Comandos intuitivos\*\*: Operaciones nativas mediante \`read\`, \`monitor\` y \`serve\`.  
-- \*\*Interfaz de usuario en terminal (TUI)\*\*: Paneles dinámicos con gráficas sparkline y componentes visuales avanzados.  
-- \*\*Soporte dual\*\*: Conectividad nativa para arquitecturas TCP (Ethernet) y RTU (RS485/puertos serie).  
-- \*\*Manejo robusto de errores\*\*: Detección y reporte detallado de fallos industriales críticos (errores de CRC, timeouts y excepciones Modbus).  
-- \*\*Asíncrono y no bloqueante\*\*: Núcleo de alto rendimiento basado en el ecosistema \`tokio\`.  
-- \*\*Simulador integrado\*\*: Motor virtual esclavo para emulación de dispositivos en entornos de desarrollo.  
-- \*\*Configuración flexible\*\*: Soporte centralizado para mapeo mediante archivos de configuración YAML.  
-  
----  
-  
-## Installation / Instalación  
-  
-### From / Desde Crates.io  
-```bash  
-cargo install modoc  
+<div align="center">
+
+# modoc
+
+**A professional CLI to read, monitor, and simulate Modbus TCP/RTU devices — right from your terminal.**
+
+[![Crates.io](https://img.shields.io/crates/v/modoc.svg)](https://crates.io/crates/modoc)
+[![Docs.rs](https://img.shields.io/docsrs/modoc)](https://docs.rs/modoc)
+[![License](https://img.shields.io/crates/l/modoc.svg)](#license)
+[![Downloads](https://img.shields.io/crates/d/modoc.svg)](https://crates.io/crates/modoc)
+
+**English** | [**Español**](README.es.md)
+
+</div>
+
+---
+
+`modoc` is a command-line tool for working with [Modbus](https://en.wikipedia.org/wiki/Modbus) devices over **TCP** or **RTU (serial)**. It's built for engineers and technicians who need to read/write registers, watch a value change live, or spin up a fake Modbus slave to test other software — without opening a GUI.
+
+```
+$ modoc read --register-type holding --address 0 --count 4 --config config.yaml
+Registros leídos (tipo: holding):
+  [0] = 512
+  [1] = 128
+  [2] = 0
+  [3] = 7
 ```
 
-### From Source / Desde Fuente
+## Features
+
+- **Read & write** holding registers, input registers, coils, and discrete inputs
+- **Modbus TCP and RTU** support, configured via a single YAML file
+- **Live dashboard** — a terminal UI (built with [ratatui](https://ratatui.rs)) that plots a register's value over time as a sparkline
+- **Built-in slave simulator** — spin up a fake Modbus TCP device to test integrations without real hardware
+- **Async under the hood** — built on [tokio](https://tokio.rs) and [tokio-modbus](https://github.com/slowtec/tokio-modbus)
+- Clear, actionable error messages for connection, configuration, and protocol errors
+
+## Installation
+
+### From crates.io
 
 ```bash
-
-git clone \[https://github.com/Arzzos/modoc.git\](https://github.com/Arzzos/modoc.git)  
-cd modoc  
-cargo build --release  
+cargo install modoc
 ```
 
-## Basic Usage / Uso Básico
+### From source
 
-### Read holding registers / Leer registros holding
-
-```Bash
-
-modoc read --address 0 --count 10 --register-type holding  
+```bash
+git clone https://github.com/Arzzos/modoc.git
+cd modoc
+cargo build --release
+./target/release/modoc --help
 ```
 
-### Write a value to a holding register / Escribir un valor en un registro holding
+> **Requirements:** Rust 1.75+ (stable). On Linux, reading serial (RTU) ports also requires `libudev` development headers (`sudo apt install libudev-dev` on Debian/Ubuntu).
 
-```Bash
+## Quick Start
 
-modoc write --address 5 --value 1234  
+1. **Create a config file.** See [Configuration](#configuration) below for TCP and RTU examples.
+
+2. **Read some registers:**
+
+   ```bash
+   modoc read --register-type holding --address 0 --count 4 --config config.yaml
+   ```
+
+3. **Write a value:**
+
+   ```bash
+   modoc read --register-type holding --address 0 --value 42 --config config.yaml
+   ```
+
+4. **Watch a register live:**
+
+   ```bash
+   modoc monitor --address 0 --interval 500 --config config.yaml
+   ```
+
+   Press `q` or `Esc` to exit the dashboard.
+
+5. **Simulate a device** (useful for testing without real hardware):
+
+   ```bash
+   modoc serve --endpoint 502 --mode tcp
+   ```
+
+## Configuration
+
+`modoc` reads a YAML file describing how to connect to your device. Pass its path with `--config` (defaults to `config.yaml` in the current directory).
+
+**TCP:**
+
+```yaml
+connection:
+  mode: tcp
+  host: 192.168.1.50
+  port: 502
 ```
 
-### Real-time streaming monitoring / Monitoreo en tiempo real
+**RTU (serial):**
 
-```Bash
-
-modoc monitor --address 100 --interval 200  
+```yaml
+connection:
+  mode: rtu
+  serial_port: /dev/ttyUSB0   # or COM3 on Windows
+  baud_rate: 9600
+  data_bits: 8
+  stop_bits: 1
+  parity: none                # none | odd | even
 ```
 
-### Simulate a virtual TCP slave / Simular un esclavo Modbus TCP
+## Usage
 
-```Bash
+```
+modoc <COMMAND>
 
-modoc serve --endpoint 502 --mode tcp  
+Commands:
+  read     Read or write Modbus registers (holding, input, coil, discrete)
+  monitor  Launch a live terminal dashboard for a register
+  serve    Run a virtual Modbus slave for testing
+  help     Print this message or the help of the given subcommand
 ```
 
-## Configuration / Configuración (`config.yaml`)
+### `read`
 
-### TCP Mode Setup
+| Flag | Description | Default |
+|---|---|---|
+| `--register-type` | `holding`, `input`, `coil`, or `discrete` | `holding` |
+| `--address` | Starting register address | — |
+| `--count` | Number of registers to read (ignored when writing) | `1` |
+| `--value` | Value to write. If set, performs a write instead of a read | — |
+| `--config` | Path to the YAML config file | `config.yaml` |
 
-```YAML
+### `monitor`
 
-connection:  
-  mode: tcp  
-  host: 192.168.1.100  
-  port: 502  
+| Flag | Description | Default |
+|---|---|---|
+| `--address` | Register address to monitor | — |
+| `--interval` | Polling interval in milliseconds | `500` |
+| `--config` | Path to the YAML config file | `config.yaml` |
+
+### `serve`
+
+| Flag | Description | Default |
+|---|---|---|
+| `--endpoint` | TCP port (e.g. `502`) or serial port name for RTU | `502` |
+| `--mode` | `tcp` or `rtu` (RTU simulation is currently a stub) | `tcp` |
+
+Run `modoc <command> --help` for the full, always-up-to-date list of flags.
+
+## How it's built
+
+```
+src/
+├── cli.rs        # Command-line interface definition (clap)
+├── core/         # Domain logic: config loading, register read/write ops, errors
+├── protocol/     # Modbus TCP and RTU client connection handling (tokio-modbus)
+├── ui/           # Terminal dashboard (ratatui + crossterm)
+└── simulator/    # Built-in Modbus TCP slave for testing
 ```
 
-### RTU (Serial/RS485) Mode Setup
+## Development
 
-```YAML
-
-connection:  
-  mode: rtu  
-  serial\_port: /dev/ttyUSB0  
-  baud\_rate: 9600  
-  data\_bits: 8  
-  stop\_bits: 1  
-  parity: None  
+```bash
+git clone https://github.com/Arzzos/modoc.git
+cd modoc
+cargo build
+cargo test
+cargo clippy --all-targets --all-features
 ```
 
-## Contributing / Cómo Contribuir
+Contributions, bug reports, and feature requests are welcome — please open an [issue](https://github.com/Arzzos/modoc/issues) or a pull request.
 
-¡Gracias por tu interés en colaborar en Modoc! Para mantener el repositorio limpio y profesional bajo las normas de código abierto, seguimos este flujo de trabajo estricto:
+## Roadmap
 
-### Workflow / Flujo de Desarrollo
+- [ ] RTU simulation in `serve`
+- [ ] Write support for multiple registers / coils in a single call
+- [ ] Export monitor history to CSV
+- [ ] Config validation with clearer diagnostics
 
-1.  ****Issues First****: Antes de escribir código, busca o abre un ****Issue**** en GitHub para discutir la característica o el fallo. Asínatelo a ti mismo para evitar conflictos de trabajo simultáneo.
-2.  ****Feature Branches****: No trabajes sobre `main`. Crea siempre una rama dedicada para tu tarea:  
-    Bash
-    
-    git checkout -b feat/issue-id-short-description  
-    
-3.  ****Quality Gates****: Asegúrate de que el analizador estático y las pruebas unitarias pasen sin ninguna advertencia antes de enviar tu código:  
-    Bash
-    
-    cargo fmt --check  
-    cargo clippy -- -D warnings  
-    cargo test  
-    
-4.  ****Pull Requests****: Abre un PR apuntando a la rama principal e incluye la etiqueta `Closes #numero_de_issue` en la descripción para la automatización del repositorio.
+## License
 
-### Commits Standards
+Licensed under either of:
 
-Seguimos estrictamente la convención de ****Conventional Commits****. Los mensajes deben estructurarse imperativamente en inglés y en presente, por ejemplo:
+- [Apache License, Version 2.0](LICENSE-APACHE)
+- [MIT license](LICENSE-MIT)
 
--   `feat: add RTU serial connection layer`
--   `fix: resolve memory leak in TUI loop context`
--   `chore: update workflow cache configurations`
+at your option.
 
-## License / Licencia
+## Acknowledgments
 
-Dual-licensed under either ****MIT License**** or ****Apache License, Version 2.0****. Este proyecto está licenciado bajo los términos compartidos de la ****Licencia MIT**** o ****Apache-2.0****.
+Built on top of the excellent [tokio-modbus](https://github.com/slowtec/tokio-modbus), [tokio-serial](https://github.com/berkowski/tokio-serial), [ratatui](https://ratatui.rs), and [clap](https://github.com/clap-rs/clap) crates.

@@ -1,3 +1,13 @@
+//! Real-time dashboard for monitoring Modbus registers.
+//!
+//! Provides a terminal UI (TUI) that displays live data from a Modbus register
+//! with a sparkline showing the historical trend.
+
+//! Dashboard en tiempo real para monitorear registros Modbus.
+//!
+//! Proporciona una interfaz de usuario en terminal (TUI) que muestra datos en vivo
+//! de un registro Modbus con un sparkline que muestra la tendencia histórica.
+
 use crate::core::read_registers;
 use anyhow::Result;
 use crossterm::{
@@ -16,6 +26,31 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::time;
 
+/// Runs the interactive dashboard for monitoring a Modbus register.
+///
+/// # Arguments
+/// * `config_path` - Path to the YAML configuration file
+/// * `address` - Register address to monitor
+/// * `interval_ms` - Sampling interval in milliseconds
+///
+/// # Returns
+/// A Result indicating success or failure. The dashboard exits when 'q' or ESC is pressed.
+///
+/// # Panics
+/// May panic if terminal operations fail.
+///
+/// Ejecuta el dashboard interactivo para monitorear un registro Modbus.
+///
+/// # Argumentos
+/// * `config_path` - Ruta al archivo de configuración YAML
+/// * `address` - Dirección del registro a monitorear
+/// * `interval_ms` - Intervalo de muestreo en milisegundos
+///
+/// # Retorna
+/// Un Result que indica éxito o fallo. El dashboard sale cuando se presiona 'q' o ESC.
+///
+/// # Pánicos
+/// Puede entrar en pánico si las operaciones de terminal fallan.
 pub async fn run_dashboard(
     config_path: &std::path::Path,
     address: u16,

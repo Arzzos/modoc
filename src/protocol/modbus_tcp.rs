@@ -1,7 +1,7 @@
+use crate::core::ModocError;
 use std::net::SocketAddr;
 use tokio_modbus::client::tcp::connect_slave;
 use tokio_modbus::Slave;
-use crate::core::ModocError;
 
 pub async fn connect_tcp(
     host: &str,

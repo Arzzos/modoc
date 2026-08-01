@@ -15,20 +15,16 @@ pub async fn read_registers(
     let mut client = create_client(&config.connection, DEFAULT_SLAVE_ID).await?;
 
     let values = match register_type {
-        "holding" => {
-            client
-                .read_holding_registers(address, count)
-                .await
-                .map_err(ModocError::Modbus)?
-                .map_err(ModocError::ModbusException)?
-        }
-        "input" => {
-            client
-                .read_input_registers(address, count)
-                .await
-                .map_err(ModocError::Modbus)?
-                .map_err(ModocError::ModbusException)?
-        }
+        "holding" => client
+            .read_holding_registers(address, count)
+            .await
+            .map_err(ModocError::Modbus)?
+            .map_err(ModocError::ModbusException)?,
+        "input" => client
+            .read_input_registers(address, count)
+            .await
+            .map_err(ModocError::Modbus)?
+            .map_err(ModocError::ModbusException)?,
         "coil" => {
             let coils = client
                 .read_coils(address, count)

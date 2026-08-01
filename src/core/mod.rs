@@ -1,7 +1,7 @@
 pub mod error;
-pub mod types;
 pub mod ops;
+pub mod types;
 
 pub use error::ModocError;
-pub use types::*;
 pub use ops::read_registers;
+pub use types::*;

@@ -3,8 +3,8 @@ mod modbus_tcp;
 
 use crate::core::ConnectionConfig;
 use crate::core::ModocError;
-use tokio_modbus::prelude::*;
 use std::marker::Unpin;
+use tokio_modbus::prelude::*;
 
 pub trait ModbusClient: Reader + Writer + Unpin + Send {}
 impl<T: Reader + Writer + Unpin + Send> ModbusClient for T {}

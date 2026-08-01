@@ -21,7 +21,7 @@ jobs:
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        components: clippy, fmt
+        components: clippy, rustfmt
 
     - name: Enable Rust Cache
       uses: Swatinem/rust-cache@v2

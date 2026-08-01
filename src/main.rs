@@ -8,7 +8,6 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Commands};
 use tracing::info;
-use tracing_subscriber;
 
 #[tokio::main]
 async fn main() -> Result<()> {

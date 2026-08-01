@@ -1,9 +1,9 @@
-pub mod dashboard;
-pub mod event;
-pub mod widgets;
+//! Módulo de interfaz de usuario en terminal (TUI).
+//!
+//! Proporciona el dashboard interactivo para el comando `monitor`.
 
-// DEV's:
-// Todo lo relacionado con la TUI (Terminal User Interface).
-// dashboard: Controla el bucle de renderizado principal.
-// event: Captura teclado de forma no bloqueante con crossterm.
-// widgets: Diseña los paneles individuales (gráficas analógicas, histogramas).
+mod dashboard;
+mod event;
+mod widgets;
+
+pub use dashboard::run_dashboard;

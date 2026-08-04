@@ -76,11 +76,13 @@ pub async fn run_dashboard(
                         if data_history.len() > 100 {
                             data_history.remove(0);
                         }
-                        let _ = tx.send(data_history.clone()).await;
+                        if tx.send(data_history.clone()).await.is_err() {
+                            break;
+                        }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Error leyendo registro: {}", e);
+                    eprintln!("Error reading register: {}", e);
                 }
             }
             time::sleep(interval).await;
@@ -101,7 +103,7 @@ pub async fn run_dashboard(
                 .borders(Borders::ALL)
                 .title(" Modoc Monitor ");
             let title_text =
-                Paragraph::new(format!("Registro {} - Último valor: {}", address, last_val))
+                Paragraph::new(format!("Register {} - Latest value: {}", address, last_val))
                     .block(title_block)
                     .style(Style::default().fg(Color::Cyan));
             f.render_widget(title_text, chunks[0]);
@@ -112,7 +114,7 @@ pub async fn run_dashboard(
                 .block(
                     Block::default()
                         .borders(Borders::ALL)
-                        .title(" Histórico (últimos 100) "),
+                        .title(" History (last 100 samples) "),
                 );
             f.render_widget(sparkline, chunks[1]);
         })?;
@@ -125,8 +127,12 @@ pub async fn run_dashboard(
             }
         }
 
-        while let Ok(new_data) = rx.try_recv() {
+        if let Ok(new_data) = rx.try_recv() {
             data = new_data;
+        } else {
+            if rx.is_empty() && rx.is_closed() {
+                break;
+            }
         }
     }
 

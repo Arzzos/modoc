@@ -30,60 +30,60 @@ pub enum ModocError {
     /// Connection error (network, serial, etc.)
     ///
     /// Error de conexión (red, serie, etc.)
-    #[error("Error de conexión: {0}")]
+    #[error("Connection error: {0}")]
     Connection(String),
 
     /// Modbus protocol communication error
     ///
     /// Error de comunicación del protocolo Modbus
-    #[error("Error de comunicación Modbus: {0}")]
+    #[error("Modbus communication error: {0}")]
     Modbus(#[from] tokio_modbus::Error),
 
     /// Serial port error
     ///
     /// Error del puerto serie
-    #[error("Error de puerto serie: {0}")]
+    #[error("Serial port error: {0}")]
     Serial(#[from] serialport::Error),
 
     /// Generic I/O error
     ///
     /// Error de E/S genérico
-    #[error("Error de E/S: {0}")]
+    #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
 
     /// Configuration error (invalid config file, missing fields, etc.)
     ///
     /// Error de configuración (archivo de configuración inválido, campos faltantes, etc.)
-    #[error("Error de configuración: {0}")]
+    #[error("Configuration error: {0}")]
     Config(String),
 
     /// Unsupported register type requested
     ///
     /// Tipo de registro no soportado solicitado
-    #[error("Tipo de registro no soportado: {0}")]
+    #[error("Unsupported register type: {0}")]
     UnsupportedRegisterType(String),
 
     /// Value is out of valid range
     ///
     /// Valor fuera del rango válido
-    #[error("Valor fuera de rango")]
+    #[error("Value out of range")]
     ValueOutOfRange,
 
     /// Operation timed out
     ///
     /// Tiempo de espera agotado
-    #[error("Tiempo de espera agotado")]
+    #[error("Operation timed out")]
     Timeout,
 
     /// CRC error in Modbus frame
     ///
     /// Error de CRC en la trama Modbus
-    #[error("Error de CRC en la trama Modbus")]
+    #[error("CRC error in Modbus frame")]
     CrcError,
 
     /// Modbus exception response received from device
     ///
     /// Respuesta de excepción Modbus recibida del dispositivo
-    #[error("Excepción Modbus: {0:?}")]
+    #[error("Modbus exception: {0:?}")]
     ModbusException(#[from] tokio_modbus::Exception),
 }

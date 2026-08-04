@@ -52,6 +52,7 @@ pub enum ConnectionConfig {
 ///
 /// Configuración de paridad serie para el modo RTU.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Parity {
     None,
     Odd,

@@ -8,5 +8,5 @@
 //! Proporciona un esclavo Modbus virtual para propósitos de prueba sin necesidad de hardware real.
 //! Actualmente soporta modo TCP con planes para soporte RTU.
 
-mod slave;
+pub mod slave;
 pub use slave::run_slave;

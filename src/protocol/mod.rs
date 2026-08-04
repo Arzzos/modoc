@@ -10,13 +10,13 @@
 //! Este módulo maneja los detalles de bajo nivel para establecer conexiones y
 //! gestionar la comunicación con dispositivos Modbus.
 
-mod modbus_rtu;
-mod modbus_tcp;
+pub mod modbus_rtu;
+pub mod modbus_tcp;
 
 use crate::core::ConnectionConfig;
 use crate::core::ModocError;
 use std::marker::Unpin;
-use tokio_modbus::prelude::*;
+use tokio_modbus::prelude::{Reader, Writer};
 
 /// Trait combining Reader and Writer traits with Unpin and Send.
 ///

@@ -32,6 +32,7 @@ Registros leídos (tipo: holding):
 - **Modbus TCP and RTU** support, configured via a single YAML file
 - **Live dashboard** — a terminal UI (built with [ratatui](https://ratatui.rs)) that plots a register's value over time as a sparkline
 - **Built-in slave simulator** — spin up a fake Modbus TCP device to test integrations without real hardware
+- **Simulator now supports write operations** (coils and holding registers) for more realistic testing
 - **Async under the hood** — built on [tokio](https://tokio.rs) and [tokio-modbus](https://github.com/slowtec/tokio-modbus)
 - Clear, actionable error messages for connection, configuration, and protocol errors
 

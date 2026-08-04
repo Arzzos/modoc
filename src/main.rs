@@ -36,15 +36,13 @@
 //! modoc serve -e 502 -m tcp
 //! ```
 
-mod cli;
-mod core;
-mod protocol;
-mod simulator;
-mod ui;
+use modoc::cli::{Cli, Commands};
+use modoc::core::ops::{read_registers, write_register};
+use modoc::simulator::run_slave;
+use modoc::ui::run_dashboard;
 
 use anyhow::Result;
 use clap::Parser;
-use cli::{Cli, Commands};
 use tracing::info;
 
 /// Main entry point for the Modoc application.
@@ -72,17 +70,16 @@ async fn main() -> Result<()> {
             value,
             config,
         } => {
-            info!("Ejecutando comando 'read'");
+            info!("Executing 'read' command");
             if let Some(val) = value {
-                core::ops::write_register(&config, &register_type, address, val).await?;
+                write_register(&config, &register_type, address, val).await?;
                 println!(
-                    "Valor {} escrito en dirección {} (tipo: {})",
+                    "Value {} written to address {} (type: {})",
                     val, address, register_type
                 );
             } else {
-                let values =
-                    core::ops::read_registers(&config, &register_type, address, count).await?;
-                println!("Registros leídos (tipo: {}):", register_type);
+                let values = read_registers(&config, &register_type, address, count).await?;
+                println!("Registers read (type: {}):", register_type);
                 for (i, v) in values.iter().enumerate() {
                     println!("  [{}] = {}", address + i as u16, v);
                 }
@@ -94,17 +91,14 @@ async fn main() -> Result<()> {
             config,
         } => {
             info!(
-                "Iniciando monitor en registro {} cada {} ms",
+                "Starting monitor on register {} every {} ms",
                 address, interval
             );
-            ui::run_dashboard(&config, address, interval).await?;
+            run_dashboard(&config, address, interval).await?;
         }
         Commands::Serve { endpoint, mode } => {
-            info!(
-                "Iniciando servidor/simulador Modbus {} en {}",
-                mode, endpoint
-            );
-            simulator::run_slave(&endpoint, &mode).await?;
+            info!("Starting Modbus {} server/simulator on {}", mode, endpoint);
+            run_slave(&endpoint, &mode).await?;
         }
     }
 

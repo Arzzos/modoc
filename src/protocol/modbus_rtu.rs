@@ -59,7 +59,7 @@ pub async fn connect_rtu(
         8 => DataBits::Eight,
         _ => {
             return Err(ModocError::Config(
-                "Número de bits de datos inválido".to_string(),
+                "Invalid data bits value (must be 5, 6, 7, or 8)".to_string(),
             ))
         }
     };
@@ -68,7 +68,7 @@ pub async fn connect_rtu(
         2 => StopBits::Two,
         _ => {
             return Err(ModocError::Config(
-                "Número de bits de parada inválido".to_string(),
+                "Invalid stop bits value (must be 1 or 2)".to_string(),
             ))
         }
     };

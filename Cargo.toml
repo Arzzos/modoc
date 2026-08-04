@@ -1,9 +1,9 @@
 [package]
 name = "modoc"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Arzzos <razzofwar@gmail.com>"]
-description = "Herramienta CLI profesional para interactuar, monitorear y simular comunicaciones Modbus TCP/RTU"
+description = "Professional CLI tool for interacting, monitoring, and simulating Modbus TCP/RTU communications"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Arzzos/modoc"
 readme = "README.md"
@@ -28,6 +28,16 @@ futures = "0.3"
 
 [dev-dependencies]
 tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.1"
+
+[lib]
+name = "modoc"
+path = "src/lib.rs"
+
+[[bin]]
+name = "modoc"
+path = "src/main.rs"
 
 [profile.release]
 lto = true

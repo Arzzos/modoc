@@ -45,7 +45,7 @@ pub async fn connect_tcp(
 ) -> Result<tokio_modbus::client::Context, ModocError> {
     let addr: SocketAddr = format!("{}:{}", host, port)
         .parse()
-        .map_err(|_| ModocError::Connection("Dirección socket inválida".to_string()))?;
+        .map_err(|_| ModocError::Connection("Invalid socket address".to_string()))?;
     let client = connect_slave(addr, Slave(slave_id))
         .await
         .map_err(|e| ModocError::Connection(e.to_string()))?;

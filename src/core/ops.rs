@@ -10,12 +10,39 @@
 
 use crate::core::error::Result;
 use crate::core::ModocError;
-use crate::protocol::create_client;
+use crate::protocol::{create_client, ModbusClient};
 
 /// Default Modbus slave ID used when not specified in configuration.
 ///
-/// ID de esclavo Modbus predeterminado utilizado cuando no se especifica en la configuración.
+/// ID de esclavo Modbus predeterminulado cuando no se especifica en la configuración.
 const DEFAULT_SLAVE_ID: u8 = 1;
+
+/// Helper to load configuration and create a client in one step.
+///
+/// # Arguments
+/// * `config_path` - Path to the YAML configuration file
+///
+/// # Returns
+/// A boxed Modbus client ready for communication.
+///
+/// # Errors
+/// Returns `ModocError` if configuration loading or client creation fails.
+///
+/// Carga la configuración y crea un cliente en un solo paso.
+///
+/// # Argumentos
+/// * `config_path` - Ruta al archivo de configuración YAML
+///
+/// # Retorna
+/// Un cliente Modbus encapsulado en un box listo para la comunicación.
+///
+/// # Errores
+/// Retorna `ModocError` si la carga de configuración o la creación del cliente fallan.
+async fn prepare_client(config_path: &std::path::Path) -> Result<Box<dyn ModbusClient>> {
+    let config = crate::core::types::load_config(config_path)
+        .map_err(|e| ModocError::Config(e.to_string()))?;
+    create_client(&config.connection, DEFAULT_SLAVE_ID).await
+}
 
 /// Reads one or more registers from a Modbus device.
 ///
@@ -33,8 +60,15 @@ const DEFAULT_SLAVE_ID: u8 = 1;
 /// or the register type is not supported.
 ///
 /// # Example
-/// ```
-/// let values = read_registers(&Path::new("config.yaml"), "holding", 0, 10).await?;
+/// ```no_run
+/// # #[tokio::main]
+/// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use std::path::Path;
+/// use modoc::core::ops::read_registers;
+///
+/// let values = read_registers(Path::new("config.yaml"), "holding", 0, 10).await?;
+/// # Ok(())
+/// # }
 /// ```
 ///
 /// Lee uno o más registros de un dispositivo Modbus.
@@ -53,8 +87,15 @@ const DEFAULT_SLAVE_ID: u8 = 1;
 /// o el tipo de registro no es soportado.
 ///
 /// # Ejemplo
-/// ```
-/// let values = read_registers(&Path::new("config.yaml"), "holding", 0, 10).await?;
+/// ```no_run
+/// # #[tokio::main]
+/// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use std::path::Path;
+/// use modoc::core::ops::read_registers;
+///
+/// let values = read_registers(Path::new("config.yaml"), "holding", 0, 10).await?;
+/// # Ok(())
+/// # }
 /// ```
 pub async fn read_registers(
     config_path: &std::path::Path,
@@ -62,9 +103,7 @@ pub async fn read_registers(
     address: u16,
     count: u16,
 ) -> Result<Vec<u16>> {
-    let config = crate::core::types::load_config(config_path)
-        .map_err(|e| ModocError::Config(e.to_string()))?;
-    let mut client = create_client(&config.connection, DEFAULT_SLAVE_ID).await?;
+    let mut client = prepare_client(config_path).await?;
 
     let values = match register_type {
         "holding" => client
@@ -132,9 +171,7 @@ pub async fn write_register(
     address: u16,
     value: u16,
 ) -> Result<()> {
-    let config = crate::core::types::load_config(config_path)
-        .map_err(|e| ModocError::Config(e.to_string()))?;
-    let mut client = create_client(&config.connection, DEFAULT_SLAVE_ID).await?;
+    let mut client = prepare_client(config_path).await?;
 
     match register_type {
         "holding" => {

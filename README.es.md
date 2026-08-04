@@ -32,6 +32,7 @@ Registros leídos (tipo: holding):
 - **Soporte para Modbus TCP y RTU**, configurado con un único archivo YAML
 - **Dashboard en vivo** — una interfaz de terminal (construida con [ratatui](https://ratatui.rs)) que grafica el valor de un registro en el tiempo como un sparkline
 - **Simulador de esclavo integrado** — levanta un dispositivo Modbus TCP falso para probar integraciones sin hardware real
+- **El simulador ahora admite operaciones de escritura** (bobinas y registros de retención) para pruebas más realistas.
 - **Asíncrono por dentro** — construido sobre [tokio](https://tokio.rs) y [tokio-modbus](https://github.com/slowtec/tokio-modbus)
 - Mensajes de error claros y accionables para problemas de conexión, configuración y protocolo
 

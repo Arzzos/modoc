@@ -38,7 +38,7 @@ async fn test_connect_rtu_invalid_baud() {
     // The serialport library may accept any baud rate, but if it fails we expect a Connection error.
     match result {
         Err(ModocError::Connection(_)) => {} // expected
-        Err(ModocError::Config(_)) => {} // also possible if serialport rejects it
+        Err(ModocError::Config(_)) => {}     // also possible if serialport rejects it
         _ => panic!("Expected Connection or Config error"),
     }
 }

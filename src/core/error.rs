@@ -11,7 +11,7 @@
 use thiserror::Error;
 
 /// Result type alias using ModocError.
-/// 
+///
 /// Alias de resultado que utiliza ModocError.
 pub type Result<T> = std::result::Result<T, ModocError>;
 

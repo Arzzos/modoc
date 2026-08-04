@@ -32,10 +32,7 @@ pub enum ConnectionConfig {
     /// TCP connection over Ethernet
     ///
     /// Conexión TCP a través de Ethernet
-    Tcp {
-        host: String,
-        port: u16,
-    },
+    Tcp { host: String, port: u16 },
     /// RTU connection over serial port
     ///
     /// Conexión RTU a través de puerto serie

@@ -28,10 +28,7 @@ async fn test_connect_tcp_invalid_address() {
 #[tokio::test]
 async fn test_connect_tcp_no_server() {
     // Use a local port that is probably free (e.g., 12345).
-    let result = timeout(
-        Duration::from_secs(2),
-        connect_tcp("127.0.0.1", 12345, 1)
-    ).await;
+    let result = timeout(Duration::from_secs(2), connect_tcp("127.0.0.1", 12345, 1)).await;
     assert!(result.is_err() || matches!(result.unwrap(), Err(ModocError::Connection(_))));
 }
 

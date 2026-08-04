@@ -33,7 +33,12 @@ pub enum Commands {
         /// Register type: holding, input, coil, discrete.
         ///
         /// Tipo de registro: holding, input, coil, discrete.
-        #[arg(short = 't', long, default_value = "holding", help = "Register type (holding, input, coil, discrete)")]
+        #[arg(
+            short = 't',
+            long,
+            default_value = "holding",
+            help = "Register type (holding, input, coil, discrete)"
+        )]
         register_type: String,
 
         /// Starting address (0‑based according to Modbus standard).
@@ -45,7 +50,12 @@ pub enum Commands {
         /// Number of registers to read (ignored if writing).
         ///
         /// Cantidad de registros a leer (ignorado si se escribe).
-        #[arg(short = 'n', long, default_value = "1", help = "Number of registers to read")]
+        #[arg(
+            short = 'n',
+            long,
+            default_value = "1",
+            help = "Number of registers to read"
+        )]
         count: u16,
 
         /// Value to write (if provided, performs a write instead of read).
@@ -57,7 +67,12 @@ pub enum Commands {
         /// Path to the YAML configuration file.
         ///
         /// Ruta al archivo de configuración YAML.
-        #[arg(short = 'c', long, default_value = "config.yaml", help = "Path to configuration file")]
+        #[arg(
+            short = 'c',
+            long,
+            default_value = "config.yaml",
+            help = "Path to configuration file"
+        )]
         config: PathBuf,
     },
 
@@ -74,13 +89,23 @@ pub enum Commands {
         /// Sampling interval in milliseconds.
         ///
         /// Intervalo de muestreo en milisegundos.
-        #[arg(short = 'i', long, default_value = "500", help = "Sampling interval (ms)")]
+        #[arg(
+            short = 'i',
+            long,
+            default_value = "500",
+            help = "Sampling interval (ms)"
+        )]
         interval: u64,
 
         /// Path to the configuration file.
         ///
         /// Ruta al archivo de configuración.
-        #[arg(short = 'c', long, default_value = "config.yaml", help = "Path to configuration file")]
+        #[arg(
+            short = 'c',
+            long,
+            default_value = "config.yaml",
+            help = "Path to configuration file"
+        )]
         config: PathBuf,
     },
 
@@ -91,7 +116,12 @@ pub enum Commands {
         /// TCP port (e.g., "502") or serial port name (e.g., "COM3").
         ///
         /// Puerto TCP (ej. "502") o nombre del puerto serie (ej. "COM3").
-        #[arg(short = 'e', long, default_value = "502", help = "Endpoint (port or serial device)")]
+        #[arg(
+            short = 'e',
+            long,
+            default_value = "502",
+            help = "Endpoint (port or serial device)"
+        )]
         endpoint: String,
 
         /// Communication mode: "tcp" or "rtu".
@@ -111,11 +141,15 @@ mod tests {
     /// Prueba que el comando read se analiza correctamente.
     #[test]
     fn verify_cli_parse_read() {
-        let args = Cli::parse_from([
-            "modoc", "read", "-a", "10", "-n", "5", "-c", "test.yaml"
-        ]);
+        let args = Cli::parse_from(["modoc", "read", "-a", "10", "-n", "5", "-c", "test.yaml"]);
         match args.command {
-            Commands::Read { address, count, config, register_type, value } => {
+            Commands::Read {
+                address,
+                count,
+                config,
+                register_type,
+                value,
+            } => {
                 assert_eq!(address, 10);
                 assert_eq!(count, 5);
                 assert_eq!(config, PathBuf::from("test.yaml"));
@@ -131,11 +165,14 @@ mod tests {
     /// Prueba que el comando read con valor de escritura se analiza correctamente.
     #[test]
     fn verify_cli_parse_write() {
-        let args = Cli::parse_from([
-            "modoc", "read", "-a", "2", "-v", "123", "-t", "coil"
-        ]);
+        let args = Cli::parse_from(["modoc", "read", "-a", "2", "-v", "123", "-t", "coil"]);
         match args.command {
-            Commands::Read { address, value, register_type, .. } => {
+            Commands::Read {
+                address,
+                value,
+                register_type,
+                ..
+            } => {
                 assert_eq!(address, 2);
                 assert_eq!(value, Some(123));
                 assert_eq!(register_type, "coil");
@@ -149,11 +186,11 @@ mod tests {
     /// Prueba que el comando monitor se analiza correctamente.
     #[test]
     fn verify_cli_parse_monitor() {
-        let args = Cli::parse_from([
-            "modoc", "monitor", "-a", "42", "-i", "100"
-        ]);
+        let args = Cli::parse_from(["modoc", "monitor", "-a", "42", "-i", "100"]);
         match args.command {
-            Commands::Monitor { address, interval, .. } => {
+            Commands::Monitor {
+                address, interval, ..
+            } => {
                 assert_eq!(address, 42);
                 assert_eq!(interval, 100);
             }
@@ -166,9 +203,7 @@ mod tests {
     /// Prueba que el comando serve se analiza correctamente.
     #[test]
     fn verify_cli_parse_serve() {
-        let args = Cli::parse_from([
-            "modoc", "serve", "-e", "5020", "-m", "tcp"
-        ]);
+        let args = Cli::parse_from(["modoc", "serve", "-e", "5020", "-m", "tcp"]);
         match args.command {
             Commands::Serve { endpoint, mode } => {
                 assert_eq!(endpoint, "5020");

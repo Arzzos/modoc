@@ -11,7 +11,7 @@
 //! - 0x05: Write Single Coil
 //! - 0x06: Write Single Register
 
-//! Implementación de un esclavo Modbus TCP simple.
+//!   Implementación de un esclavo Modbus TCP simple.
 //!
 //! Responde a peticiones de lectura/escritura para holding registers, coils,
 //! discrete inputs e input registers. Todos los datos se almacenan en memoria
@@ -70,7 +70,8 @@ pub async fn run_slave(endpoint: &str, mode: &str) -> Result<()> {
 /// Ejecuta el servidor TCP para la simulación del esclavo Modbus.
 async fn run_tcp_slave(port: &str) -> Result<()> {
     let addr = format!("0.0.0.0:{}", port);
-    let listener = TcpListener::bind(&addr).await
+    let listener = TcpListener::bind(&addr)
+        .await
         .with_context(|| format!("Failed to bind to {}", addr))?;
     info!("Modbus TCP simulator listening on {}", addr);
 
@@ -90,7 +91,15 @@ async fn run_tcp_slave(port: &str) -> Result<()> {
         let discrete_inputs = discrete_inputs.clone();
         let input_registers = input_registers.clone();
         tokio::spawn(async move {
-            if let Err(e) = handle_client(stream, holding_registers, coils, discrete_inputs, input_registers).await {
+            if let Err(e) = handle_client(
+                stream,
+                holding_registers,
+                coils,
+                discrete_inputs,
+                input_registers,
+            )
+            .await
+            {
                 error!("Client error: {}", e);
             }
         });
@@ -152,7 +161,7 @@ async fn handle_client(
                     continue;
                 }
 
-                let byte_count = ((quantity + 7) / 8) as u8;
+                let byte_count = quantity.div_ceil(8) as u8;
                 let len = (byte_count as u16) + 3; // unit_id + function + byte_count + data
                 let mut response = Vec::with_capacity(6 + 1 + 1 + 1 + byte_count as usize);
                 response.extend_from_slice(&buf[0..4]);
@@ -195,7 +204,7 @@ async fn handle_client(
                     continue;
                 }
 
-                let byte_count = ((quantity + 7) / 8) as u8;
+                let byte_count = quantity.div_ceil(8) as u8;
                 let len = (byte_count as u16) + 3;
                 let mut response = Vec::with_capacity(6 + 1 + 1 + 1 + byte_count as usize);
                 response.extend_from_slice(&buf[0..4]);

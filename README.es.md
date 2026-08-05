@@ -15,26 +15,19 @@
 
 ---
 
-`modoc` es una herramienta de línea de comandos para trabajar con dispositivos [Modbus](https://es.wikipedia.org/wiki/Modbus) por **TCP** o **RTU (serie)**. Está pensada para ingenieros y técnicos que necesitan leer/escribir registros, ver un valor cambiar en tiempo real, o levantar un esclavo Modbus falso para probar otro software — sin necesidad de abrir una GUI.
+`modoc` es una herramienta de línea de comandos para trabajar con dispositivos [Modbus](https://es.wikipedia.org/wiki/Modbus) por **TCP** o **RTU (serie)**. Proporciona acceso de lectura/escritura a registros, un dashboard en vivo y un simulador Modbus TCP integrado para pruebas sin hardware.
 
-```
-$ modoc read --register-type holding --address 0 --count 4 --config config.yaml
-Registros leídos (tipo: holding):
-  [0] = 512
-  [1] = 128
-  [2] = 0
-  [3] = 7
-```
+Versión actual: `0.2.0`
 
 ## Características
 
 - **Lectura y escritura** de holding registers, input registers, coils y discrete inputs
-- **Soporte para Modbus TCP y RTU**, configurado con un único archivo YAML
-- **Dashboard en vivo** — una interfaz de terminal (construida con [ratatui](https://ratatui.rs)) que grafica el valor de un registro en el tiempo como un sparkline
-- **Simulador de esclavo integrado** — levanta un dispositivo Modbus TCP falso para probar integraciones sin hardware real
-- **El simulador ahora admite operaciones de escritura** (bobinas y registros de retención) para pruebas más realistas.
-- **Asíncrono por dentro** — construido sobre [tokio](https://tokio.rs) y [tokio-modbus](https://github.com/slowtec/tokio-modbus)
-- Mensajes de error claros y accionables para problemas de conexión, configuración y protocolo
+- **Soporte para Modbus TCP y RTU** mediante configuración YAML
+- **Dashboard en vivo** — interfaz de terminal construida con [ratatui](https://ratatui.rs) y [crossterm](https://crates.io/crates/crossterm)
+- **Simulador TCP integrado** con soporte de lectura y escritura
+- **CLI definida con `clap`** para parseo estable y salida de `--help` consistente
+- **E/S asíncrona** usando [tokio](https://tokio.rs) y [tokio-modbus](https://github.com/slowtec/tokio-modbus)
+- Mensajes de error claros para fallos de conexión, configuración y protocolo
 
 ## Instalación
 
@@ -43,6 +36,10 @@ Registros leídos (tipo: holding):
 ```bash
 cargo install modoc
 ```
+
+### Desde GitHub releases
+
+Descarga la versión más reciente en [https://github.com/Arzzos/modoc/releases](https://github.com/Arzzos/modoc/releases).
 
 ### Desde el código fuente
 
@@ -53,41 +50,37 @@ cargo build --release
 ./target/release/modoc --help
 ```
 
-> **Requisitos:** Rust 1.75+ (stable). En Linux, leer puertos serie (RTU) también requiere los headers de desarrollo de `libudev` (`sudo apt install libudev-dev` en Debian/Ubuntu).
+> **Requisitos:** Rust 1.75+ (stable). En Linux, el soporte serial (RTU) requiere los headers de `libudev`: `sudo apt install libudev-dev` en Debian/Ubuntu.
 
 ## Inicio rápido
 
-1. **Crea un archivo de configuración.** Revisa la sección [Configuración](#configuración) más abajo para ejemplos de TCP y RTU.
+1. Crea un archivo de configuración. Consulta [Configuración](#configuración) para ejemplos de TCP y RTU.
+2. Lee registros.
+3. Escribe un valor en un registro.
+4. Monitorea un registro en vivo.
+5. Ejecuta el simulador TCP.
 
-2. **Lee algunos registros:**
+### Ejemplo en Linux
 
-   ```bash
-   modoc read --register-type holding --address 0 --count 4 --config config.yaml
-   ```
+```bash
+modoc read --register-type holding --address 0 --count 4 --config config.yaml
+modoc read --register-type coil --address 10 --value 1 --config config.yaml
+modoc monitor --address 0 --interval 500 --config config.yaml
+modoc serve --endpoint 502 --mode tcp
+```
 
-3. **Escribe un valor:**
+### Ejemplo en Windows (PowerShell)
 
-   ```bash
-   modoc read --register-type holding --address 0 --value 42 --config config.yaml
-   ```
-
-4. **Observa un registro en vivo:**
-
-   ```bash
-   modoc monitor --address 0 --interval 500 --config config.yaml
-   ```
-
-   Presiona `q` o `Esc` para salir del dashboard.
-
-5. **Simula un dispositivo** (útil para probar sin hardware real):
-
-   ```bash
-   modoc serve --endpoint 502 --mode tcp
-   ```
+```powershell
+modoc.exe read --register-type holding --address 0 --count 4 --config config.yaml
+modoc.exe read --register-type coil --address 10 --value 1 --config config.yaml
+modoc.exe monitor --address 0 --interval 500 --config config.yaml
+modoc.exe serve --endpoint 502 --mode tcp
+```
 
 ## Configuración
 
-`modoc` lee un archivo YAML que describe cómo conectarse a tu dispositivo. Pásale la ruta con `--config` (por defecto usa `config.yaml` en el directorio actual).
+`modoc` lee un archivo YAML que describe cómo conectarse a tu dispositivo. Pasa la ruta con `--config` (por defecto `config.yaml`).
 
 **TCP:**
 
@@ -112,42 +105,45 @@ connection:
 
 ## Uso
 
-```
+```bash
 modoc <COMMAND>
-
-Commands:
-  read     Lee o escribe registros Modbus (holding, input, coil, discrete)
-  monitor  Inicia un dashboard de terminal en vivo para un registro
-  serve    Ejecuta un esclavo Modbus virtual para pruebas
-  help     Muestra este mensaje o la ayuda de un subcomando
 ```
+
+### Comandos
+
+- `read` — Lee o escribe registros Modbus (holding, input, coil, discrete)
+- `monitor` — Inicia un dashboard de terminal en vivo para un registro
+- `serve` — Ejecuta un esclavo virtual Modbus para pruebas
+- `help` — Muestra este mensaje o la ayuda del subcomando dado
 
 ### `read`
 
 | Flag | Descripción | Default |
 |---|---|---|
-| `--register-type` | `holding`, `input`, `coil`, o `discrete` | `holding` |
-| `--address` | Dirección de inicio del registro | — |
-| `--count` | Cantidad de registros a leer (se ignora si se escribe) | `1` |
-| `--value` | Valor a escribir. Si se indica, se realiza una escritura en lugar de una lectura | — |
-| `--config` | Ruta al archivo de configuración YAML | `config.yaml` |
+| `-t, --register-type` | Tipo de registro: `holding`, `input`, `coil` o `discrete` | `holding` |
+| `-a, --address` | Dirección inicial del registro | — |
+| `-n, --count` | Número de registros a leer (ignorado si se escribe) | `1` |
+| `-v, --value` | Valor a escribir; habilita el modo escritura | — |
+| `-c, --config` | Ruta del archivo de configuración YAML | `config.yaml` |
 
 ### `monitor`
 
 | Flag | Descripción | Default |
 |---|---|---|
-| `--address` | Dirección del registro a monitorear | — |
-| `--interval` | Intervalo de muestreo en milisegundos | `500` |
-| `--config` | Ruta al archivo de configuración YAML | `config.yaml` |
+| `-a, --address` | Dirección del registro a monitorear | — |
+| `-i, --interval` | Intervalo de muestreo en milisegundos | `500` |
+| `-c, --config` | Ruta del archivo de configuración YAML | `config.yaml` |
 
 ### `serve`
 
 | Flag | Descripción | Default |
 |---|---|---|
-| `--endpoint` | Puerto TCP (ej. `502`) o nombre del puerto serie para RTU | `502` |
-| `--mode` | `tcp` o `rtu` (la simulación RTU aún está pendiente) | `tcp` |
+| `-e, --endpoint` | Puerto TCP (ej. `502`) o nombre de puerto serie para RTU | `502` |
+| `-m, --mode` | `tcp` o `rtu` | `tcp` |
 
-Ejecuta `modoc <comando> --help` para ver la lista completa y siempre actualizada de flags.
+> Nota: `serve --mode tcp` inicia el simulador Modbus TCP integrado. `serve --mode rtu` se acepta en la CLI, pero el soporte RTU aún no está implementado.
+
+Ejecuta `modoc <comando> --help` para ver la referencia de CLI actual.
 
 ## Cómo está construido
 
@@ -155,9 +151,9 @@ Ejecuta `modoc <comando> --help` para ver la lista completa y siempre actualizad
 src/
 ├── cli.rs        # Definición de la interfaz de línea de comandos (clap)
 ├── core/         # Lógica de dominio: carga de config, operaciones de lectura/escritura, errores
-├── protocol/     # Manejo de conexión de clientes Modbus TCP y RTU (tokio-modbus)
+├── protocol/     # Manejo de clientes Modbus TCP y RTU (tokio-modbus)
 ├── ui/           # Dashboard de terminal (ratatui + crossterm)
-└── simulator/    # Esclavo Modbus TCP integrado para pruebas
+└── simulator/    # Simulador de esclavo Modbus TCP integrado
 ```
 
 ## Desarrollo
@@ -167,13 +163,29 @@ git clone https://github.com/Arzzos/modoc.git
 cd modoc
 cargo build
 cargo test
+cargo fmt --all
 cargo clippy --all-targets --all-features
 ```
+
+### Dependencias recomendadas en Linux
+
+```bash
+sudo apt update
+sudo apt install libudev-dev
+```
+
+### Notas para Windows
+
+Instala Rust con [rustup](https://rustup.rs/) y utiliza puertos `COM` para dispositivos RTU. Ejecuta PowerShell como Administrador si necesitas acceso al hardware serial.
 
 Las contribuciones, reportes de bugs y solicitudes de funcionalidades son bienvenidas — abre un [issue](https://github.com/Arzzos/modoc/issues) o un pull request.
 
 ## Roadmap
 
+- [x] Comando `read` básico para registros holding, input, coil y discrete
+- [x] Modo escritura para valores de holding y coil con `read --value`
+- [x] Comando `monitor` con dashboard de terminal en vivo
+- [x] Comando `serve` con simulación Modbus TCP y soporte de lectura/escritura
 - [ ] Simulación RTU en `serve`
 - [ ] Soporte de escritura para múltiples registros/coils en una sola llamada
 - [ ] Exportar el historial del monitor a CSV
@@ -190,4 +202,4 @@ a tu elección.
 
 ## Agradecimientos
 
-Construido sobre los excelentes crates [tokio-modbus](https://github.com/slowtec/tokio-modbus), [tokio-serial](https://github.com/berkowski/tokio-serial), [ratatui](https://ratatui.rs) y [clap](https://github.com/clap-rs/clap).
+Construido sobre los excelentes crates [tokio-modbus](https://github.com/slowtec/tokio-modbus), [tokio-serial](https://github.com/berkowski/tokio-serial), [ratatui](https://ratatui.rs) y [clap](https://github.com/clap-rs/clap) crates.
